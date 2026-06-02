@@ -760,7 +760,7 @@ SemiParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state 
     }
 
     if (!options[["coefficientHazardRatioEstimatesIncludeFrailty"]])
-      estimatesFit <- estimatesFit[grepl("JaspColumn", rownames(estimatesFit)), , drop=FALSE]
+      estimatesFit <- estimatesFit[!grepl("frailty", rownames(estimatesFit), fixed = TRUE), , drop=FALSE]
 
   } else {
 

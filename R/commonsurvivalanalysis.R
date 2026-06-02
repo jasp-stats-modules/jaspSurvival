@@ -325,14 +325,12 @@
   # based on jaspMixedModels::.mmVariableNames
 
   # deal with non-standard columns names
-  if (!grepl("JaspColumn", varName)) {
-    if (varName == "(Intercept)")
-      return("Intercept")
-    if (varName == "Global")
-      return("Global")
-    if (grepl("gamma:", varName, fixed = TRUE) || grepl("gauss:", varName, fixed = TRUE) || grepl("t:", varName, fixed = TRUE))
-      return(paste0("(frailty) ", varName))
-  }
+  if (varName == "(Intercept)")
+    return("Intercept")
+  if (varName == "Global")
+    return("Global")
+  if (grepl("gamma:", varName, fixed = TRUE) || grepl("gauss:", varName, fixed = TRUE) || grepl("t:", varName, fixed = TRUE))
+    return(paste0("(frailty) ", varName))
 
   for (vn in variables) {
     inf <- regexpr(vn, varName, fixed = TRUE)

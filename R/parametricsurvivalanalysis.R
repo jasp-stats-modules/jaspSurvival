@@ -714,14 +714,22 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
   if (anyRegression) {
 
     # add z-values and p-values
-    thisRegression <- grepl("JaspColumn", data[["coefficient"]])
-    data$z[thisRegression]      <- data$est[thisRegression] / data$se[thisRegression]
-    data$pValue[thisRegression] <- 2 * pnorm(-abs(data$z[thisRegression]))
+    thisRegression <- data[["isRegressionCoefficient"]]
+    thisRegression[is.na(thisRegression)] <- FALSE
+    data$z      <- NA_real_
+    data$pValue <- NA_real_
+    if (any(thisRegression)) {
+      data$z[thisRegression]      <- data$est[thisRegression] / data$se[thisRegression]
+      data$pValue[thisRegression] <- 2 * pnorm(-abs(data$z[thisRegression]))
+    }
     estimatesTable$addFootnote(gettext("P-values are based on a Wald test."))
 
     # fix coefficient names
-    data[["coefficient"]][thisRegression] <- sapply(data[["coefficient"]][thisRegression], .saTermNames, variables = c(options[["covariates"]], options[["factors"]]))
+    if (any(thisRegression))
+      data[["coefficient"]][thisRegression] <- sapply(data[["coefficient"]][thisRegression], .saTermNames, variables = c(options[["covariates"]], options[["factors"]]))
   }
+
+  data[["isRegressionCoefficient"]] <- NULL
 
   # add footnotes
   messages <- .sapSelectedModelMessage(fit, options)
@@ -2809,6 +2817,7 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
 
   # rename the CI columns
   colnames(coeffTable)[(ncol(coeffTable) - 2):(ncol(coeffTable)-1)] <- c("lower", "upper")
+  coeffTable[["isRegressionCoefficient"]] <- seq_len(nrow(fit[["res"]])) %in% fit[["covpars"]]
 
   return(coeffTable)
 }

@@ -19,10 +19,211 @@ test_that("ParametricSurvivalAnalysis (analysis 1) results match", {
   jaspTools::expect_equal_tables(table,
     list(7, 1, "Events", 5, 2, "", 6, 1, "Censored", 8, 2, ""))
 
+  table <- results[["results"]][["coefficientsCovarianceMatrixTable"]][["collection"]][["coefficientsCovarianceMatrixTable_table1"]][["data"]]
+  jaspTools::expect_equal_tables(table,
+    list("shape", 0.00294583404147664, -0.195092282202688, 0.101399586243753,
+     "scale", -0.0284318665535529, 1.84744099223018, -0.195092282202688,
+     "jaspColumn1", 0.000449368523120733, -0.0284318665535529, 0.00294583404147664
+    ))
+
+  table <- results[["results"]][["coefficientsCovarianceMatrixTable"]][["collection"]][["coefficientsCovarianceMatrixTable_table2"]][["data"]]
+  jaspTools::expect_equal_tables(table,
+    list("shape", 0.00753960491518431, -0.472986932576419, 0.116539009633363,
+     "scale", -0.379053598831464, 22.8507010819253, -0.472986932576419,
+     "jaspColumn1", 0.00628895179079035, -0.379053598831464, 0.00753960491518431
+    ))
+
+  table <- results[["results"]][["coefficientsTable"]][["data"]]
+  jaspTools::expect_equal_tables(table,
+    list("shape", 1.73216181581721, 0.927978224300617, "", 0.551577512747128,
+     1, 3.2332488819298, "", "scale", 46376.8295087911, 3231.04344408301,
+     "", 63035.6656423456, "", 665670.503201136, "", "jaspColumn1",
+     -0.0745258521170902, -0.116073784398787, 0.000438678956616039,
+     0.0211983141575158, "", -0.0329779198353937, -3.51564995043096,
+     "shape", 1.99218807760198, 1.02034905849015, "", 0.680089387992485,
+     2, 3.88966236947607, "", "scale", 12246469.3772606, 1044.87092896917,
+     "", 58541071.2613659, "", 143535443517.547, "", "jaspColumn1",
+     -0.159479574128679, -0.314910424765391, 0.0443235669184763,
+     0.0793029116160961, "", -0.00404872349196797, -2.01101789176061
+    ))
+
+  plotName <- results[["results"]][["cumulativeHazardPlot"]][["collection"]][["cumulativeHazardPlot_table1"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-1_subgroup-1-")
+
+  plotName <- results[["results"]][["cumulativeHazardPlot"]][["collection"]][["cumulativeHazardPlot_table2"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-2_subgroup-2-")
+
+  plotName <- results[["results"]][["hazardPlot"]][["collection"]][["hazardPlot_table1"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-3_subgroup-1-")
+
+  plotName <- results[["results"]][["hazardPlot"]][["collection"]][["hazardPlot_table2"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-4_subgroup-2-")
+
+  table <- results[["results"]][["lifeTimeTable"]][["collection"]][["lifeTimeTable_table1"]][["data"]]
+  jaspTools::expect_equal_tables(table,
+    list(0, 0, 0, 0, 0, 0, "<unicode>", 0, 0, 0, 0, 0, 0, 123, 0.04589999700458,
+     0.00518290779653138, 0.172165997192324, 0.000646392050060632,
+     0.000107174895488599, 0.00157850659788787, 120.962320563707,
+     113.360195599485, 122.893560184502, 0.0448625259766594, 0.177871009139788,
+     0.00378437860822389, 246, 0.152491389279767, 0.0364775278882595,
+     0.399533243184474, 0.00107373886890784, 0.000349990579111217,
+     0.00255356417522903, 232.887788012382, 207.906306731773, 244.254285144193,
+     0.141433713201337, 0.361961446846558, 0.029279914395244, 369,
+     0.30779664106479, 0.104731011291696, 0.735061812929682, 0.00144486067395454,
+     0.000623684011992211, 0.00413285956819355, 331.072114221693,
+     279.987118855627, 360.144652793727, 0.264935215197203, 0.544524132317749,
+     0.0816518244757919, 492, 0.506614930762481, 0.193915048242253,
+     1.27201896454453, 0.00178361593168628, 0.000762100494741992,
+     0.00676607126497844, 413.349433348712, 328.04321387505, 466.141575349322,
+     0.397468257743826, 0.730504762546907, 0.165682398686094, 614,
+     0.743562729610374, 0.307177967775138, 2.21830952647087, 0.00209767258614968,
+     0.000838967272475044, 0.00990780026755102, 479.007552945456,
+     353.761895029687, 560.670710125836, 0.524582887932561, 0.887058184322678,
+     0.246908607904536, 737, 1.02017931840542, 0.441400386020114,
+     3.4985759202225, 0.00239771460058114, 0.000889466169569609,
+     0.0147070424076869, 530.250196899194, 364.189144905456, 644.723282580467,
+     0.639469715339462, 0.961776079977611, 0.35034717781829, 860,
+     1.33286139825671, 0.583874225476029, 5.22202121633127, 0.00268457165097327,
+     0.000921084234116285, 0.0197574864280285, 568.44391469234, 368.387032389084,
+     718.142127389873, 0.736278431789546, 0.993314070863662, 0.433239057875749,
+     983, 1.68014111584834, 0.712048905984369, 7.49684709778472,
+     0.00296060659822688, 0.000916899554505154, 0.0253274910552036,
+     595.925825111859, 369.176363783698, 782.063398809863, 0.813652322426719,
+     0.999309068142921, 0.50729065801857, 1106, 2.06079708851964,
+     0.859772382279156, 10.6598894550945, 0.0032275172033282, 0.000948436337725259,
+     0.0323396301259641, 615.040871203671, 369.176434167847, 838.721974700201,
+     0.872647581723173, 0.999963800337782, 0.580953893721555))
+
+  table <- results[["results"]][["lifeTimeTable"]][["collection"]][["lifeTimeTable_table2"]][["data"]]
+  jaspTools::expect_equal_tables(table,
+    list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 136, 0.00869539911641592,
+     0.000163591921207248, 0.075833980659704, 0.000127374047424372,
+     4.34206091843378e-06, 0.000566202171464824, 135.60580881558,
+     131.137848194669, 135.996255019032, 0.00865770347220152, 0.0738984002687497,
+     0.000270264507821527, 273, 0.0348476041675894, 0.00233104283606026,
+     0.167004352036461, 0.000254296635735036, 3.09866401590254e-05,
+     0.000750644715090301, 269.853570611605, 252.446447166309, 272.883869525714,
+     0.0342474182878266, 0.153013404816842, 0.00335416453666559,
+     409, 0.0779691465831053, 0.00978718727580946, 0.276159793778596,
+     0.00037977800548573, 7.99058740345776e-05, 0.00104247943865914,
+     398.587310611234, 362.314419007479, 408.158347680888, 0.0750070347031391,
+     0.240762378922097, 0.0131636443626882, 545, 0.138132296400909,
+     0.0271489431524225, 0.40542297887141, 0.00050492754866362, 0.000139116780246265,
+     0.00150421277405772, 520.850185828311, 455.992846042998, 542.136232067324,
+     0.12901654385316, 0.34207944195578, 0.0295193619982062, 682,
+     0.215928610519776, 0.0528622251515454, 0.642410818854988, 0.000630748392215043,
+     0.000214647627499562, 0.00224551505201704, 635.81649794337,
+     543.716521197863, 673.787372045649, 0.194207175048875, 0.463257490839974,
+     0.0554257124063335, 818, 0.31019239715386, 0.0933776256977882,
+     0.950963389568438, 0.000755454273071759, 0.000265285268849026,
+     0.00299209804779529, 740.545691676849, 611.311300488523, 801.043427524644,
+     0.266694143308586, 0.613282813080783, 0.0880661469006182, 954,
+     0.421404814595403, 0.14063933020653, 1.35160548204994, 0.000879997534047205,
+     0.000300508986626228, 0.00428183597246934, 835.062999182697,
+     662.096090285491, 922.413759263119, 0.343875561108497, 0.748213615704298,
+     0.125911520822415, 1091, 0.550550288311108, 0.197487975509884,
+     1.98346871640157, 0.00100531596745529, 0.000342148896234624,
+     0.00582309140786014, 919.510389727533, 693.533392833943, 1037.00261928984,
+     0.423367591017112, 0.854032435030784, 0.164573650042433, 1227,
+     0.695725715127604, 0.268278463485721, 2.84855495032016, 0.00112959777910214,
+     0.00036728730288059, 0.00783466615910583, 992.608544523504,
+     711.900131593995, 1146.37926295165, 0.501287606501468, 0.927809016715587,
+     0.21652105858515))
+
+  plotName <- results[["results"]][["probabilityPlot"]][["collection"]][["probabilityPlot_table1"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-5_subgroup-1-")
+
+  plotName <- results[["results"]][["probabilityPlot"]][["collection"]][["probabilityPlot_table2"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-6_subgroup-2-")
+
+  plotName <- results[["results"]][["residualHistogram"]][["collection"]][["residualHistogram_table1"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-7_subgroup-1-")
+
+  plotName <- results[["results"]][["residualHistogram"]][["collection"]][["residualHistogram_table2"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-8_subgroup-2-")
+
+  plotName <- results[["results"]][["residualVsPredictedPlot"]][["collection"]][["residualVsPredictedPlot_table1"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-9_subgroup-1-")
+
+  plotName <- results[["results"]][["residualVsPredictedPlot"]][["collection"]][["residualVsPredictedPlot_table2"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-10_subgroup-2-")
+
+  plotName <- results[["results"]][["residualsVsPredictorsPlot"]][["collection"]][["residualsVsPredictorsPlot_table1"]][["collection"]][["residualsVsPredictorsPlot_table1_residualPlotResidualVsPredictors1"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-11_residuals-vs-jaspcolumn1")
+
+  plotName <- results[["results"]][["residualsVsPredictorsPlot"]][["collection"]][["residualsVsPredictorsPlot_table2"]][["collection"]][["residualsVsPredictorsPlot_table2_residualPlotResidualVsPredictors1"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-12_residuals-vs-jaspcolumn1")
+
+  plotName <- results[["results"]][["residualsVsTimePlot"]][["collection"]][["residualsVsTimePlot_table1"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-13_subgroup-1-")
+
+  plotName <- results[["results"]][["residualsVsTimePlot"]][["collection"]][["residualsVsTimePlot_table2"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-14_subgroup-2-")
+
+  plotName <- results[["results"]][["restrictedMeanSurvivalTimePlot"]][["collection"]][["restrictedMeanSurvivalTimePlot_table1"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-15_subgroup-1-")
+
+  plotName <- results[["results"]][["restrictedMeanSurvivalTimePlot"]][["collection"]][["restrictedMeanSurvivalTimePlot_table2"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-16_subgroup-2-")
+
   table <- results[["results"]][["summaryTable"]][["data"]]
   jaspTools::expect_equal_tables(table,
     list(104.448725742629, 106.143573815014, 3, -49.2243628713144, 1, 83.5344037495967,
      85.2292518219813, 3, -38.7672018747983, 2))
+
+  plotName <- results[["results"]][["survivalProbabilityPlot"]][["collection"]][["survivalProbabilityPlot_table1"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-17_subgroup-1-")
+
+  plotName <- results[["results"]][["survivalProbabilityPlot"]][["collection"]][["survivalProbabilityPlot_table2"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-18_subgroup-2-")
+
+  plotName <- results[["results"]][["survivalTimePlot"]][["collection"]][["survivalTimePlot_table1"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-19_subgroup-1-")
+
+  plotName <- results[["results"]][["survivalTimePlot"]][["collection"]][["survivalTimePlot_table2"]][["data"]]
+  testPlot <- results[["state"]][["figures"]][[plotName]][["obj"]]
+  jaspTools::expect_equal_plots(testPlot, "analysis-1_figure-20_subgroup-2-")
+
+  table <- results[["results"]][["survivalTimeTable"]][["collection"]][["survivalTimeTable_table1"]][["data"]]
+  jaspTools::expect_equal_tables(table,
+    list(0, 0, 0, 0, 0.1, 198.718086748457, 63.4725227988521, 401.196573803081,
+     0.2, 306.469681424375, 136.18448198518, 553.605761401134, 0.3,
+     401.771801827806, 217.237849271519, 676.136494691836, 0.4, 494.356631593181,
+     287.111296446282, 805.752824878585, 0.5, 589.610008817539, 346.901671445617,
+     972.789477292467, 0.6, 692.691306791741, 395.152878171957, 1198.58529169667,
+     0.7, 810.960120381918, 450.47792620339, 1460.33829373806, 0.8,
+     958.901933768744, 506.373627989931, 1895.8464592472, 0.9, 1179.15349846453,
+     574.359209474288, 2684.66174884533))
+
+  table <- results[["results"]][["survivalTimeTable"]][["collection"]][["survivalTimeTable_table2"]][["data"]]
+  jaspTools::expect_equal_tables(table,
+    list(0, 0, 0, 0, 0.1, 475.726369440225, 187.024827596037, 870.148235394596,
+     0.2, 693.345077123755, 355.890593689999, 1171.32527299015, 0.3,
+     877.390496431623, 490.351748846787, 1455.66803221102, 0.4, 1050.74860461096,
+     596.93775814311, 1754.5784455397, 0.5, 1224.71518779887, 718.76654463732,
+     2090.94489927072, 0.6, 1408.88863141754, 801.674121799586, 2464.27385300016,
+     0.7, 1615.84930419667, 872.162007522935, 2904.09421489461, 0.8,
+     1869.29043658753, 970.981396216079, 3616.15517040957, 0.9, 2237.44555055393,
+     1096.01510661062, 4797.56582520057))
 
 })
 
