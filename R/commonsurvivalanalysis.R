@@ -22,6 +22,8 @@
 }
 .saCheckDataset       <- function(dataset, options, type) {
 
+  nOriginal <- nrow(dataset)
+
   # load the data
   eventVariable <- if (options[["censoringType"]] != "interval") options[["eventStatus"]]
   timeVariable  <- switch(
@@ -57,6 +59,7 @@
     # recode the event status variable
     dataset[[eventVariable]] <- .saRecodeEventStatus(dataset, options)
   }
+  attr(dataset, "missingObservations") <- nOriginal - nrow(dataset)
 
   # check of errors
   .hasErrors(
@@ -109,6 +112,18 @@
   }
 
   return(dataset)
+}
+.saMissingObservations <- function(x) {
+
+  return(as.integer(attr(x, "missingObservations", exact = TRUE)))
+}
+.saAddMissingObservationsFootnote <- function(tempTable, x) {
+
+  missingObservations <- .saMissingObservations(x)
+  if (length(missingObservations) > 0L && missingObservations > 0L)
+    tempTable$addFootnote(gettextf("%1$i observations omitted due to missing values.", missingObservations))
+
+  return()
 }
 .saRecodeEventStatus  <- function(dataset, options) {
 

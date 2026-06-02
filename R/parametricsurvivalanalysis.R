@@ -163,6 +163,7 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
 
       subgroupDataset <- dataset[dataset[[options[["subgroup"]]]] == subgroupLevels[i],,drop=FALSE]
       subgroupDataset <- droplevels(subgroupDataset)
+      attr(subgroupDataset, "missingObservations") <- .saMissingObservations(dataset)
 
       attr(subgroupDataset, "subgroup")      <- as.character(subgroupLevels[i])
       attr(subgroupDataset, "subgroupLabel") <- gettextf("Subgroup: %1$s", subgroupLevels[i])
@@ -640,6 +641,9 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
   errors <- .sapCollectFitErrors(fit, options)
   for (i in seq_along(errors))
     summaryTable$addFootnote(errors[[i]], symbol = gettext("Error: "))
+
+  if (length(fit) > 0)
+    .saAddMissingObservationsFootnote(summaryTable, attr(fit[[1]], "dataset", exact = TRUE))
 
   summaryTable$setData(data)
   summaryTable$showSpecifiedColumnsOnly <- TRUE
