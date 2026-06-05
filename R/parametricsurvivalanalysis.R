@@ -1007,7 +1007,7 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
                           "predictionsLifeTimeStepsType", "predictionsLifeTimeStepsNumber", "predictionsLifeTimeStepsFrom", "predictionsLifeTimeStepsSize",
                           "predictionsLifeTimeStepsTo", "predictionsLifeTimeRoundSteps", "predictionsLifeTimeCustom",
                           "lifeTimeMergePlotsAcrossDistributions", "colorPalette", "plotLegend", "plotTheme",
-                          "survivalProbabilityPlotAddKaplanMeier", "survivalProbabilityPlotAddCensoringEvents", "survivalProbabilityPlotTransformXAxis", "survivalProbabilityPlotTransformYAxis",
+                          "survivalProbabilityPlotKaplanMeier", "survivalProbabilityPlotCensoringEvents", "survivalProbabilityPlotTransformXAxis", "survivalProbabilityPlotTransformYAxis",
                           "survivalProbabilityAsFailureProbability"
   )
 
@@ -1443,7 +1443,7 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
   }
 
   # compute Kaplan-Meier if needed
-  if (type == "survival" && options[["survivalProbabilityPlotAddKaplanMeier"]] && options[["censoringType"]] == "right") {
+  if (type == "survival" && isTRUE(options[["survivalProbabilityPlotKaplanMeier"]]) && options[["censoringType"]] == "right") {
 
     kmFit    <- try(survfit(
       formula = .saGetFormula(options, type = "KM"),
@@ -1483,7 +1483,7 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
   plot <- ggplot2::ggplot(data = out)
 
   # add censoring observations if requested
-  if (type == "survival" && options[["survivalProbabilityPlotAddCensoringEvents"]] && options[["censoringType"]] == "right") {
+  if (type == "survival" && isTRUE(options[["survivalProbabilityPlotCensoringEvents"]]) && options[["censoringType"]] == "right") {
     plot <- plot + ggplot2::geom_rug(
       data    = data.frame(censoring = tempData[[options[["timeToEvent"]]]][!tempData[[options[["eventStatus"]]]]]),
       mapping = ggplot2::aes(x = censoring),
@@ -1492,7 +1492,7 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
   }
 
   # add Kaplan-Meier if needed
-  if (type == "survival" && options[["survivalProbabilityPlotAddKaplanMeier"]] && options[["censoringType"]] == "right") {
+  if (type == "survival" && isTRUE(options[["survivalProbabilityPlotKaplanMeier"]]) && options[["censoringType"]] == "right") {
 
     if (options[["predictionsConfidenceInterval"]]) {
       aesCall <- list(
@@ -1836,7 +1836,7 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
     .sapDependencies, "interpretModel", "compareModelsAcrossDistributions", "alwaysDisplayModelInformation",
     "probabilityPlot", "probabilityPlotCanvas", "probabilityPlotEmpiricalPoints",
     "probabilityPlotPointCoordinates", "probabilityPlotFittedCurve",
-    "probabilityPlotMergePlotsAcrossDistributions",
+    "probabilityPlotCensoringEvents", "probabilityPlotMergePlotsAcrossDistributions",
     "probabilityPlotConfidenceInterval", "probabilityPlotConfidenceIntervalLevel",
     "probabilityPlotGrid", "probabilityPlotPlottingPosition", "probabilityPlotRankAdjustment",
     "probabilityPlotTiesHandler", "probabilityPlotLegend", "probabilityPlotColorPalette",
@@ -1974,12 +1974,16 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
   if (options[["probabilityPlotEmpiricalPoints"]])
     empiricalData <- .sapProbabilityPlotEmpiricalData(dataset, options)
 
+  censoringData <- data.frame(time = numeric(0))
+  if (isTRUE(options[["probabilityPlotCensoringEvents"]]))
+    censoringData <- .sapProbabilityPlotCensoringData(dataset, options)
+
   curveData <- .sapProbabilityPlotEmptyCurveData()
   if (options[["probabilityPlotFittedCurve"]])
     curveData <- .sapProbabilityPlotCurveData(fitList, options, timeSequence)
 
-  if (nrow(empiricalData) == 0 && nrow(curveData) == 0)
-    stop(gettext("The probability plot requires at least one positive observed failure time or a fitted curve."))
+  if (nrow(empiricalData) == 0 && nrow(curveData) == 0 && nrow(censoringData) == 0)
+    stop(gettext("The probability plot requires at least one positive observed failure time, censored observation, or fitted curve."))
 
   hasDistribution <- nrow(curveData) > 0 && length(unique(stats::na.omit(curveData[["Distribution"]]))) > 1
   hasLevel        <- nrow(curveData) > 0 && length(unique(stats::na.omit(curveData[["Level"]]))) > 1
@@ -2050,7 +2054,7 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
       jaspGraphs::scale_JASPfill_discrete(options[["probabilityPlotColorPalette"]])
   }
 
-  plot <- .sapProbabilityPlotAddAxes(plot, empiricalData, curveData, options, observedTimeRange)
+  plot <- .sapProbabilityPlotAddAxes(plot, empiricalData, curveData, censoringData, options, observedTimeRange)
   plot <- .sapProbabilityPlotAddTheme(plot, options)
 
   return(plot)
@@ -2101,6 +2105,39 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
   out[["probability"]] <- .sapProbabilityPlotClampProbability(out[["probability"]])
   out[["label"]]       <- sprintf("%s, %s", .sapProbabilityPlotTimeLabel(out[["time"]]), .sapProbabilityPlotProbabilityLabel(out[["probability"]]))
   rownames(out)        <- NULL
+
+  return(out)
+}
+
+.sapProbabilityPlotCensoringData <- function(dataset, options) {
+
+  time  <- .saExtractSurvTimes(dataset, options)
+  event <- dataset[[options[["eventStatus"]]]]
+
+  if (!is.null(options[["weights"]]) && options[["weights"]] != "") {
+    weights <- dataset[[options[["weights"]]]]
+  } else {
+    weights <- rep(1L, length(time))
+  }
+
+  keep <- is.finite(time) & time > 0 & !is.na(event) & is.finite(weights) & weights > 0
+  time <- time[keep]
+  event <- as.logical(event[keep])
+  weights <- as.integer(weights[keep])
+
+  keepCensored <- !event
+  time <- time[keepCensored]
+  weights <- weights[keepCensored]
+
+  if (length(time) == 0)
+    return(data.frame(time = numeric(0)))
+
+  if (any(weights > 1L))
+    time <- rep.int(time, weights)
+
+  out <- data.frame(time = time)
+  out <- out[order(out[["time"]]), , drop = FALSE]
+  rownames(out) <- NULL
 
   return(out)
 }
@@ -2295,13 +2332,13 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
   ))
 }
 
-.sapProbabilityPlotAddAxes <- function(plot, empiricalData, curveData, options, observedTimeRange = NULL) {
+.sapProbabilityPlotAddAxes <- function(plot, empiricalData, curveData, censoringData, options, observedTimeRange = NULL) {
 
   canvas   <- .sapProbabilityPlotCanvasTransform(options[["probabilityPlotCanvas"]])
   detailed <- .sapProbabilityPlotIsDetailed(options)
 
   if (detailed) {
-    axisSetup <- .sapProbabilityPlotDetailedAxisSetup(empiricalData, curveData, observedTimeRange, canvas)
+    axisSetup <- .sapProbabilityPlotDetailedAxisSetup(empiricalData, curveData, censoringData, observedTimeRange, canvas)
     plot <- plot + ggplot2::geom_hline(
       yintercept = canvas[["inverse"]](0),
       linetype   = 3,
@@ -2309,8 +2346,10 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
       linewidth  = 0.35
     )
   } else {
-    axisSetup <- .sapProbabilityPlotDefaultAxisSetup(empiricalData, curveData, canvas)
+    axisSetup <- .sapProbabilityPlotDefaultAxisSetup(empiricalData, curveData, censoringData, canvas)
   }
+
+  plot <- .sapProbabilityPlotCensoringEvents(plot, censoringData)
 
   xScaleCall <- list(
     trans        = canvas[["xTransform"]],
@@ -2343,9 +2382,9 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
   return(plot)
 }
 
-.sapProbabilityPlotDefaultAxisSetup <- function(empiricalData, curveData, canvas) {
+.sapProbabilityPlotDefaultAxisSetup <- function(empiricalData, curveData, censoringData, canvas) {
 
-  timeValues <- c(empiricalData[["time"]], curveData[["time"]])
+  timeValues <- c(empiricalData[["time"]], curveData[["time"]], censoringData[["time"]])
   timeRange  <- .sapProbabilityPlotTimeRange(timeValues)
 
   return(list(
@@ -2358,10 +2397,10 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
   ))
 }
 
-.sapProbabilityPlotDetailedAxisSetup <- function(empiricalData, curveData, observedTimeRange = NULL, canvas) {
+.sapProbabilityPlotDetailedAxisSetup <- function(empiricalData, curveData, censoringData, observedTimeRange = NULL, canvas) {
 
   if (is.null(observedTimeRange)) {
-    timeValues <- c(empiricalData[["time"]], curveData[["time"]])
+    timeValues <- c(empiricalData[["time"]], curveData[["time"]], censoringData[["time"]])
     observedTimeRange <- .sapProbabilityPlotTimeRange(timeValues)
   }
   timeRange <- .sapProbabilityPlotDetailedTimeRange(observedTimeRange, canvas)
@@ -2390,6 +2429,23 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
     yBreaks          = yBreaks,
     yMinor           = yMinor
   ))
+}
+
+.sapProbabilityPlotCensoringEvents <- function(plot, censoringData) {
+
+  if (is.null(censoringData) || nrow(censoringData) == 0)
+    return(plot)
+
+  plot <- plot + ggplot2::geom_rug(
+    data    = censoringData,
+    mapping = ggplot2::aes(x = time),
+    sides   = "b",
+    color   = "grey60",
+    alpha   = 0.5,
+    size    = 0.5
+  )
+
+  return(plot)
 }
 
 .sapProbabilityPlotCanvasTransform <- function(canvas) {

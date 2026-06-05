@@ -16,6 +16,7 @@
 # jaspSurvival 0.96.5
 ## Added
 * Added an exponential canvas to the parametric survival probability plot.
+* Added optional censoring marks to the parametric survival probability plot.
 
 ## Changed
 * Enabled prediction and probability-plot legend/color-palette controls only when the plot can display multiple fitted curves, while keeping theme controls available for selected plots.

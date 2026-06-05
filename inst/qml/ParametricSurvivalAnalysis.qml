@@ -556,18 +556,18 @@ Form
 
 					CheckBox
 					{
-						name:		"survivalProbabilityPlotAddKaplanMeier"
-						label:		qsTr("Add Kaplan-Meier")
+						name:		"survivalProbabilityPlotKaplanMeier"
+						label:		qsTr("Kaplan-Meier")
 						enabled:	censoringTypeRight.checked
-						info: qsTr("Add a Kaplan-Meier curve to the plot. Only available when Censoring Type is set to Right.")
+						info: qsTr("Show a Kaplan-Meier curve in the plot. Only available when Censoring Type is set to Right.")
 					}
 
 					CheckBox
 					{
-						name:		"survivalProbabilityPlotAddCensoringEvents"
-						label:		qsTr("Add censoring events")
+						name:		"survivalProbabilityPlotCensoringEvents"
+						label:		qsTr("Censoring events")
 						enabled:	censoringTypeRight.checked
-						info: qsTr("Add censoring events as rug marks to the plot. Only available when Censoring Type is set to Right.")
+						info: qsTr("Show censoring events as rug marks in the plot. Only available when Censoring Type is set to Right.")
 					}
 
 					DropDown
@@ -862,6 +862,14 @@ Form
 				label:		qsTr("Fitted curve")
 				checked:	true
 				info: qsTr("Plot the fitted curve from the selected parametric model.")
+			}
+
+			CheckBox
+			{
+				name:		"probabilityPlotCensoringEvents"
+				label:		qsTr("Censoring events")
+				enabled:	censoringTypeRight.checked
+				info: qsTr("Show censored observations as rug marks at the bottom of the plot. Only available when Censoring Type is set to Right.")
 			}
 
 			CheckBox
