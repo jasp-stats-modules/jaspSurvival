@@ -1487,7 +1487,7 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
     plot <- plot + ggplot2::geom_rug(
       data    = data.frame(censoring = tempData[[options[["timeToEvent"]]]][!tempData[[options[["eventStatus"]]]]]),
       mapping = ggplot2::aes(x = censoring),
-      sides = "b", color = "grey60", alpha = 0.5, size = 0.5
+      sides = "b", color = "darkblue", alpha = 0.5, size = 0.5
     )
   }
 
@@ -2440,7 +2440,7 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
     data    = censoringData,
     mapping = ggplot2::aes(x = time),
     sides   = "b",
-    color   = "grey60",
+    color   = "darkblue",
     alpha   = 0.5,
     size    = 0.5
   )
