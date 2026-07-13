@@ -2386,14 +2386,16 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
 
   timeValues <- c(empiricalData[["time"]], curveData[["time"]], censoringData[["time"]])
   timeRange  <- .sapProbabilityPlotTimeRange(timeValues)
+  probabilityRange <- .sapProbabilityPlotProbabilityRange()
+  yAxisSetup <- .sapProbabilityPlotAxisBreaks(probabilityRange, canvas)
 
   return(list(
     timeRange        = timeRange,
-    probabilityRange = .sapProbabilityPlotProbabilityRange(),
+    probabilityRange = probabilityRange,
     xBreaks          = .sapProbabilityPlotTimeBreaks(timeRange, canvas),
     xMinor           = .sapProbabilityPlotTimeMinorBreaks(timeRange, canvas),
-    yBreaks          = c(0.001, 0.005, 0.01, 0.02, 0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95, 0.98, 0.99, 0.995, 0.999),
-    yMinor           = sort(unique(c(seq(0.001, 0.009, by = 0.001), seq(0.01, 0.09, by = 0.01), seq(0.10, 0.90, by = 0.10), seq(0.91, 0.99, by = 0.01), 0.995, 0.999)))
+    yBreaks          = yAxisSetup[["yBreaks"]],
+    yMinor           = yAxisSetup[["yMinor"]]
   ))
 }
 
@@ -2410,24 +2412,15 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
     probabilityValues <- curveData[["probability"]]
 
   probabilityRange <- .sapProbabilityPlotDetailedProbabilityRange(probabilityValues)
-  probabilityGridRange <- c(probabilityRange[1] / 10, 1 - (1 - probabilityRange[2]) / 10)
-
-  yBreaks <- sort(unique(c(
-    .sapProbabilityPlotSeqProbability(probabilityGridRange[1], probabilityGridRange[2], c(1, 2, 5)),
-    0.9
-  )))
-  yBreaks <- yBreaks[yBreaks >= probabilityRange[1] & yBreaks <= probabilityRange[2]]
-
-  yMinor <- .sapProbabilityPlotSeqProbability(probabilityGridRange[1], probabilityGridRange[2], 1:9)
-  yMinor <- yMinor[yMinor >= probabilityRange[1] & yMinor <= probabilityRange[2]]
+  yAxisSetup <- .sapProbabilityPlotAxisBreaks(probabilityRange, canvas, detailed = TRUE)
 
   return(list(
     timeRange        = timeRange,
     probabilityRange = probabilityRange,
     xBreaks          = .sapProbabilityPlotTimeBreaks(timeRange, canvas),
     xMinor           = .sapProbabilityPlotTimeMinorBreaks(timeRange, canvas),
-    yBreaks          = yBreaks,
-    yMinor           = yMinor
+    yBreaks          = yAxisSetup[["yBreaks"]],
+    yMinor           = yAxisSetup[["yMinor"]]
   ))
 }
 
@@ -2696,6 +2689,41 @@ ParametricSurvivalAnalysis <- function(jaspResults, dataset, options, state = NU
 
 .sapProbabilityPlotUsesLogTime <- function(canvas) {
   return(identical(canvas[["xTransform"]], "log"))
+}
+
+.sapProbabilityPlotIsExponential <- function(canvas) {
+  return(identical(canvas[["name"]], "exponentialProbability"))
+}
+
+.sapProbabilityPlotAxisBreaks <- function(probabilityRange, canvas, detailed = FALSE) {
+
+  if (.sapProbabilityPlotIsExponential(canvas)) {
+    yBreaks <- c(probabilityRange[1], 0.30, 0.50, 0.70, 0.80, 0.90, 0.95, 0.98, 0.99, 0.995, probabilityRange[2])
+    yBreaks <- sort(unique(yBreaks[yBreaks >= probabilityRange[1] & yBreaks <= probabilityRange[2]]))
+
+    transformedBreaks <- canvas[["transform"]](yBreaks)
+    transformedMinor  <- transformedBreaks[-length(transformedBreaks)] + diff(transformedBreaks) / 2
+    yMinor            <- canvas[["inverse"]](transformedMinor)
+  } else if (detailed) {
+    probabilityGridRange <- c(probabilityRange[1] / 10, 1 - (1 - probabilityRange[2]) / 10)
+
+    yBreaks <- sort(unique(c(
+      .sapProbabilityPlotSeqProbability(probabilityGridRange[1], probabilityGridRange[2], c(1, 2, 5)),
+      0.9
+    )))
+    yBreaks <- yBreaks[yBreaks >= probabilityRange[1] & yBreaks <= probabilityRange[2]]
+
+    yMinor <- .sapProbabilityPlotSeqProbability(probabilityGridRange[1], probabilityGridRange[2], 1:9)
+    yMinor <- yMinor[yMinor >= probabilityRange[1] & yMinor <= probabilityRange[2]]
+  } else {
+    yBreaks <- c(0.001, 0.005, 0.01, 0.02, 0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95, 0.98, 0.99, 0.995, 0.999)
+    yBreaks <- yBreaks[yBreaks >= probabilityRange[1] & yBreaks <= probabilityRange[2]]
+
+    yMinor <- sort(unique(c(seq(0.001, 0.009, by = 0.001), seq(0.01, 0.09, by = 0.01), seq(0.10, 0.90, by = 0.10), seq(0.91, 0.99, by = 0.01), 0.995, 0.999)))
+    yMinor <- yMinor[yMinor >= probabilityRange[1] & yMinor <= probabilityRange[2]]
+  }
+
+  return(list(yBreaks = yBreaks, yMinor = yMinor))
 }
 
 .sapProbabilityPlotProbabilityLabel <- function(probability) {
