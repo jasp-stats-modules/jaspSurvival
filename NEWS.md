@@ -13,6 +13,10 @@
 
 
 ---
+# jaspSurvival 0.98.1
+## Added
+* Growth analysis
+
 # jaspSurvival 0.98.0
 ## Added
 * Reworked Predictions controls for flexible plots and predictions
